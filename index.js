@@ -41,19 +41,22 @@ function createBot() {
       port: 4090,
 
       username:
-        "BarkadaBot"
+        "BarkadaBot",
+
+      version:
+        "1.21.1"
     });
 
-  // ── WHEN BOT JOINS ───────────────
-  bot.on(
+  // ── FULLY SPAWNED ────────────────
+  bot.once(
     "spawn",
     () => {
 
       console.log(
-        "Bot joined server!"
+        "Bot fully spawned!"
       );
 
-      // ── AUTHME REGISTER ──────────
+      // ── REGISTER ─────────────────
       setTimeout(() => {
 
         bot.chat(
@@ -64,9 +67,9 @@ function createBot() {
           "Tried /register"
         );
 
-      }, 3000);
+      }, 5000);
 
-      // ── AUTHME LOGIN ─────────────
+      // ── LOGIN ────────────────────
       setTimeout(() => {
 
         bot.chat(
@@ -77,7 +80,50 @@ function createBot() {
           "Tried /login"
         );
 
-      }, 6000);
+      }, 8000);
+
+      // ── JUMP ─────────────────────
+      setTimeout(() => {
+
+        bot.setControlState(
+          "jump",
+          true
+        );
+
+        setTimeout(() => {
+
+          bot.setControlState(
+            "jump",
+            false
+          );
+
+        }, 1000);
+
+      }, 12000);
+
+      // ── MOVE FORWARD ─────────────
+      setTimeout(() => {
+
+        bot.look(
+          0,
+          0
+        );
+
+        bot.setControlState(
+          "forward",
+          true
+        );
+
+        setTimeout(() => {
+
+          bot.setControlState(
+            "forward",
+            false
+          );
+
+        }, 2000);
+
+      }, 15000);
 
       // ── ONLINE MESSAGE ───────────
       setTimeout(() => {
@@ -86,7 +132,7 @@ function createBot() {
           "BarkadaBot Online!"
         );
 
-      }, 9000);
+      }, 18000);
     }
   );
 
@@ -107,7 +153,7 @@ function createBot() {
     }
   );
 
-  // ── ERROR HANDLER ────────────────
+  // ── ERROR ────────────────────────
   bot.on(
     "error",
     err => {
@@ -131,7 +177,7 @@ function createBot() {
     }
   );
 
-  // ── CHAT LOG ─────────────────────
+  // ── CHAT LOGGER ──────────────────
   bot.on(
     "messagestr",
     msg => {
@@ -144,5 +190,5 @@ function createBot() {
   );
 }
 
-// ── START BOT ──────────────────────
+// ── START ──────────────────────────
 createBot();
