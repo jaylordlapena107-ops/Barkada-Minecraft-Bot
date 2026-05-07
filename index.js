@@ -25,8 +25,12 @@ app.listen(PORT, () => {
   );
 });
 
-// ── MINECRAFT BOT ──────────────────
+// ── CREATE BOT ─────────────────────
 function createBot() {
+
+  console.log(
+    "Starting bot..."
+  );
 
   const bot =
     mineflayer.createBot({
@@ -40,6 +44,7 @@ function createBot() {
         "BarkadaBot"
     });
 
+  // ── WHEN BOT JOINS ───────────────
   bot.on(
     "spawn",
     () => {
@@ -48,13 +53,44 @@ function createBot() {
         "Bot joined server!"
       );
 
-      bot.chat(
-        "BarkadaBot Online!"
-      );
+      // ── AUTHME REGISTER ──────────
+      setTimeout(() => {
+
+        bot.chat(
+          "/register 011020 011020"
+        );
+
+        console.log(
+          "Tried /register"
+        );
+
+      }, 3000);
+
+      // ── AUTHME LOGIN ─────────────
+      setTimeout(() => {
+
+        bot.chat(
+          "/login 011020"
+        );
+
+        console.log(
+          "Tried /login"
+        );
+
+      }, 6000);
+
+      // ── ONLINE MESSAGE ───────────
+      setTimeout(() => {
+
+        bot.chat(
+          "BarkadaBot Online!"
+        );
+
+      }, 9000);
     }
   );
 
-  // auto reconnect
+  // ── AUTO RECONNECT ───────────────
   bot.on(
     "end",
     () => {
@@ -63,17 +99,50 @@ function createBot() {
         "Disconnected..."
       );
 
-      setTimeout(
-        createBot,
-        5000
+      setTimeout(() => {
+
+        createBot();
+
+      }, 10000);
+    }
+  );
+
+  // ── ERROR HANDLER ────────────────
+  bot.on(
+    "error",
+    err => {
+
+      console.log(
+        "BOT ERROR:",
+        err
       );
     }
   );
 
+  // ── KICK DETECT ──────────────────
   bot.on(
-    "error",
-    err => console.log(err)
+    "kicked",
+    reason => {
+
+      console.log(
+        "KICKED:",
+        reason
+      );
+    }
+  );
+
+  // ── CHAT LOG ─────────────────────
+  bot.on(
+    "messagestr",
+    msg => {
+
+      console.log(
+        "[CHAT]",
+        msg
+      );
+    }
   );
 }
 
+// ── START BOT ──────────────────────
 createBot();
