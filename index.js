@@ -1,6 +1,31 @@
 const mineflayer =
 require("mineflayer");
 
+const express =
+require("express");
+
+const app =
+express();
+
+// ── WEB SERVER ─────────────────────
+app.get("/", (req, res) => {
+
+  res.send(
+    "BarkadaBot Online!"
+  );
+});
+
+const PORT =
+process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+
+  console.log(
+    `Web server running on port ${PORT}`
+  );
+});
+
+// ── MINECRAFT BOT ──────────────────
 function createBot() {
 
   const bot =
