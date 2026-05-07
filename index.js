@@ -41,11 +41,19 @@ function createBot() {
       port: 4090,
 
       username:
-        "BarkadaBot",
+        "BarkadaBot1",
 
       version:
-        "1.21.1"
+        "1.21.1",
+
+      auth:
+        "offline",
+
+      hideErrors: true
     });
+
+  // cleanup listeners
+  bot.removeAllListeners();
 
   // ── FULLY SPAWNED ────────────────
   bot.once(
@@ -101,7 +109,7 @@ function createBot() {
 
       }, 12000);
 
-      // ── MOVE FORWARD ─────────────
+      // ── MOVE ─────────────────────
       setTimeout(() => {
 
         bot.look(
@@ -125,7 +133,7 @@ function createBot() {
 
       }, 15000);
 
-      // ── ONLINE MESSAGE ───────────
+      // ── CHAT ─────────────────────
       setTimeout(() => {
 
         bot.chat(
@@ -142,26 +150,24 @@ function createBot() {
     () => {
 
       console.log(
-        "Disconnected..."
+        "Bot disconnected."
       );
+
+      try {
+
+        bot.quit();
+
+      } catch (e) {}
 
       setTimeout(() => {
 
+        console.log(
+          "Reconnecting..."
+        );
+
         createBot();
 
-      }, 10000);
-    }
-  );
-
-  // ── ERROR ────────────────────────
-  bot.on(
-    "error",
-    err => {
-
-      console.log(
-        "BOT ERROR:",
-        err
-      );
+      }, 15000);
     }
   );
 
@@ -173,6 +179,24 @@ function createBot() {
       console.log(
         "KICKED:",
         reason
+      );
+
+      try {
+
+        bot.quit();
+
+      } catch (e) {}
+    }
+  );
+
+  // ── ERROR ────────────────────────
+  bot.on(
+    "error",
+    err => {
+
+      console.log(
+        "BOT ERROR:",
+        err
       );
     }
   );
@@ -190,5 +214,5 @@ function createBot() {
   );
 }
 
-// ── START ──────────────────────────
+// ── START BOT ──────────────────────
 createBot();
