@@ -9,21 +9,32 @@ require("express");
 const app =
 express();
 
-app.get("/", (req, res) => {
+// ── WEB SERVER ─────────────────────
+app.get(
+  "/",
+  (req, res) => {
 
-  res.send(
-    "Bot Online"
-  );
-});
-
-app.listen(
-  process.env.PORT || 3000
+    res.send(
+      "BarkadaBot Online!"
+    );
+  }
 );
 
+app.listen(
+  process.env.PORT || 3000,
+  () => {
+
+    console.log(
+      "Web server running."
+    );
+  }
+);
+
+// ── CONNECT BOT ────────────────────
 function connectBot() {
 
   console.log(
-    "Connecting..."
+    "Connecting bot..."
   );
 
   const client =
@@ -32,7 +43,8 @@ function connectBot() {
       host:
         "barkadacraftsmp.sg1-mczie.fun",
 
-      port: 4090,
+      port:
+        4090,
 
       username:
         "BarkadaBot",
@@ -44,50 +56,19 @@ function connectBot() {
         "1.19.4"
     });
 
+  // ── CONNECTED ────────────────────
   client.on(
     "connect",
     () => {
 
       console.log(
-        "Connected!"
+        "Bot connected!"
       );
-    }
-  );
 
-  client.on(
-    "packet",
-    (data, meta) => {
+      // fallback auto login
+      setTimeout(() => {
 
-      // authme detection
-      if (
-        meta.name === "system_chat"
-      ) {
-
-        const msg =
-          JSON.stringify(data);
-
-        console.log(msg);
-
-        if (
-          msg.includes(
-            "/register"
-          )
-        ) {
-
-          client.write(
-            "chat_command",
-            {
-              command:
-                "register 011020 011020"
-            }
-          );
-        }
-
-        if (
-          msg.includes(
-            "/login"
-          )
-        ) {
+        try {
 
           client.write(
             "chat_command",
@@ -96,33 +77,122 @@ function connectBot() {
                 "login 011020"
             }
           );
+
+          console.log(
+            "Fallback login sent"
+          );
+
+        } catch (e) {
+
+          console.log(e);
         }
+
+      }, 10000);
+    }
+  );
+
+  // ── PACKET LISTENER ──────────────
+  client.on(
+    "packet",
+    (data, meta) => {
+
+      try {
+
+        const msg =
+          JSON.stringify(data);
+
+        console.log(
+          "[PACKET]",
+          msg
+        );
+
+        // ── REGISTER DETECT ────────
+        if (
+          msg.includes(
+            "/register"
+          )
+        ) {
+
+          console.log(
+            "Register detected"
+          );
+
+          client.write(
+            "chat_command",
+            {
+              command:
+                "register 011020 011020"
+            }
+          );
+
+          console.log(
+            "Register command sent"
+          );
+        }
+
+        // ── LOGIN DETECT ───────────
+        if (
+          msg.includes(
+            "/login"
+          )
+        ) {
+
+          console.log(
+            "Login detected"
+          );
+
+          client.write(
+            "chat_command",
+            {
+              command:
+                "login 011020"
+            }
+          );
+
+          console.log(
+            "Login command sent"
+          );
+        }
+
+      } catch (e) {
+
+        console.log(
+          "PACKET ERROR:",
+          e
+        );
       }
     }
   );
 
+  // ── DISCONNECT ───────────────────
   client.on(
     "end",
     () => {
 
       console.log(
-        "Disconnected"
+        "Bot disconnected."
       );
 
-      setTimeout(
-        connectBot,
-        10000
-      );
+      setTimeout(() => {
+
+        connectBot();
+
+      }, 10000);
     }
   );
 
+  // ── ERROR ────────────────────────
   client.on(
     "error",
     err => {
 
-      console.log(err);
+      console.log(
+        "BOT ERROR:",
+        err
+      );
     }
   );
 }
 
+// ── START ──────────────────────────
 connectBot();
