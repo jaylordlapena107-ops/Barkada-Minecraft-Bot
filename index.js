@@ -41,21 +41,25 @@ function createBot() {
       port: 4090,
 
       username:
-        "BarkadaBot1",
+        "BarkadaAFK",
 
       version:
-        "1.21.1",
+        "1.20.4",
 
       auth:
         "offline",
 
-      hideErrors: true
+      skipValidation:
+        true,
+
+      hideErrors:
+        true,
+
+      checkTimeoutInterval:
+        60000
     });
 
-  // cleanup listeners
-  bot.removeAllListeners();
-
-  // ── FULLY SPAWNED ────────────────
+  // ── SPAWN ────────────────────────
   bot.once(
     "spawn",
     () => {
@@ -88,59 +92,16 @@ function createBot() {
           "Tried /login"
         );
 
-      }, 8000);
+      }, 9000);
 
-      // ── JUMP ─────────────────────
-      setTimeout(() => {
-
-        bot.setControlState(
-          "jump",
-          true
-        );
-
-        setTimeout(() => {
-
-          bot.setControlState(
-            "jump",
-            false
-          );
-
-        }, 1000);
-
-      }, 12000);
-
-      // ── MOVE ─────────────────────
-      setTimeout(() => {
-
-        bot.look(
-          0,
-          0
-        );
-
-        bot.setControlState(
-          "forward",
-          true
-        );
-
-        setTimeout(() => {
-
-          bot.setControlState(
-            "forward",
-            false
-          );
-
-        }, 2000);
-
-      }, 15000);
-
-      // ── CHAT ─────────────────────
+      // ── ONLINE MESSAGE ───────────
       setTimeout(() => {
 
         bot.chat(
           "BarkadaBot Online!"
         );
 
-      }, 18000);
+      }, 13000);
     }
   );
 
@@ -171,7 +132,7 @@ function createBot() {
     }
   );
 
-  // ── KICK DETECT ──────────────────
+  // ── KICK ─────────────────────────
   bot.on(
     "kicked",
     reason => {
@@ -214,5 +175,5 @@ function createBot() {
   );
 }
 
-// ── START BOT ──────────────────────
+// ── START ──────────────────────────
 createBot();
