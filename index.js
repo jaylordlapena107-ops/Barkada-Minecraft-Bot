@@ -33,6 +33,7 @@ function createBot() {
   );
 
   const bot =
+  const bot =
   mineflayer.createBot({
 
     host:
@@ -44,13 +45,13 @@ function createBot() {
       "BarkadaBot",
 
     version:
-      false,
+      "1.19.4",
 
     auth:
       "offline",
 
-    skipValidation:
-      true
+    viewDistance:
+      "tiny"
   });
 
   // ── SPAWN ────────────────────────
