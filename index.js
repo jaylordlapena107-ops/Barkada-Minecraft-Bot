@@ -41,7 +41,7 @@ function createBot() {
     port: 4090,
 
     username:
-      "BarkadaAFK",
+      "BarkadaBot",
 
     version:
       false,
