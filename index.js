@@ -1,5 +1,7 @@
-const mineflayer =
-require("mineflayer");
+const mc =
+require(
+  "minecraft-protocol"
+);
 
 const express =
 require("express");
@@ -7,168 +9,120 @@ require("express");
 const app =
 express();
 
-// ── WEB SERVER ─────────────────────
 app.get("/", (req, res) => {
 
   res.send(
-    "BarkadaBot Online!"
+    "Bot Online"
   );
 });
 
-const PORT =
-process.env.PORT || 3000;
+app.listen(
+  process.env.PORT || 3000
+);
 
-app.listen(PORT, () => {
-
-  console.log(
-    `Web server running on port ${PORT}`
-  );
-});
-
-// ── CREATE BOT ─────────────────────
-function createBot() {
+function connectBot() {
 
   console.log(
-    "Starting bot..."
+    "Connecting..."
   );
 
-  const bot =
-  const bot =
-  mineflayer.createBot({
+  const client =
+    mc.createClient({
 
-    host:
-      "barkadacraftsmp.sg1-mczie.fun",
+      host:
+        "barkadacraftsmp.sg1-mczie.fun",
 
-    port: 4090,
+      port: 4090,
 
-    username:
-      "BarkadaBot",
+      username:
+        "BarkadaBot",
 
-    version:
-      "1.19.4",
+      auth:
+        "offline",
 
-    auth:
-      "offline",
+      version:
+        "1.19.4"
+    });
 
-    viewDistance:
-      "tiny"
-  });
-
-  // ── SPAWN ────────────────────────
-  bot.once(
-    "spawn",
+  client.on(
+    "connect",
     () => {
 
       console.log(
-        "Bot fully spawned!"
+        "Connected!"
       );
-
-      // ── REGISTER ─────────────────
-      setTimeout(() => {
-
-        bot.chat(
-          "/register 011020 011020"
-        );
-
-        console.log(
-          "Tried /register"
-        );
-
-      }, 5000);
-
-      // ── LOGIN ────────────────────
-      setTimeout(() => {
-
-        bot.chat(
-          "/login 011020"
-        );
-
-        console.log(
-          "Tried /login"
-        );
-
-      }, 9000);
-
-      // ── ONLINE MESSAGE ───────────
-      setTimeout(() => {
-
-        bot.chat(
-          "BarkadaBot Online!"
-        );
-
-      }, 13000);
     }
   );
 
-  // ── AUTO RECONNECT ───────────────
-  bot.on(
+  client.on(
+    "packet",
+    (data, meta) => {
+
+      // authme detection
+      if (
+        meta.name === "system_chat"
+      ) {
+
+        const msg =
+          JSON.stringify(data);
+
+        console.log(msg);
+
+        if (
+          msg.includes(
+            "/register"
+          )
+        ) {
+
+          client.write(
+            "chat_command",
+            {
+              command:
+                "register 011020 011020"
+            }
+          );
+        }
+
+        if (
+          msg.includes(
+            "/login"
+          )
+        ) {
+
+          client.write(
+            "chat_command",
+            {
+              command:
+                "login 011020"
+            }
+          );
+        }
+      }
+    }
+  );
+
+  client.on(
     "end",
     () => {
 
       console.log(
-        "Bot disconnected."
+        "Disconnected"
       );
 
-      try {
-
-        bot.quit();
-
-      } catch (e) {}
-
-      setTimeout(() => {
-
-        console.log(
-          "Reconnecting..."
-        );
-
-        createBot();
-
-      }, 15000);
+      setTimeout(
+        connectBot,
+        10000
+      );
     }
   );
 
-  // ── KICK ─────────────────────────
-  bot.on(
-    "kicked",
-    reason => {
-
-      console.log(
-        "KICKED:",
-        reason
-      );
-
-      try {
-
-        bot.quit();
-
-      } catch (e) {}
-    }
-  );
-
-  // ── ERROR ────────────────────────
-  bot.on(
+  client.on(
     "error",
     err => {
 
-      console.log(
-        "BOT ERROR:",
-        err
-      );
-    }
-  );
-
-  // ── CHAT LOGGER ──────────────────
-  bot.on(
-    "messagestr",
-    msg => {
-
-      console.log(
-        "[CHAT]",
-        msg
-      );
+      console.log(err);
     }
   );
 }
 
-// ── START ──────────────────────────
-createBot();
+connectBot();
