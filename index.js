@@ -35,31 +35,15 @@ function createBot() {
     "Connecting..."
   );
 
-  const bot =
-    mineflayer.createBot({
-
-      host:
-        "barkadacraftsmp.sg1-mczie.fun",
-
-      port:
-        4090,
-
-      username:
-        "BarkadaBot",
-
-      auth:
-        "offline",
-
-      version:
-        "1.21.1",
-
-      hideErrors:
-        true,
-
-      checkTimeoutInterval:
-        60000
-    });
-
+  const bot = mineflayer.createBot({
+  host: "barkadacraftsmp.sg1-mczie.fun",
+  port: 4090,
+  username: "BarkadaBot1",
+  auth: "offline",
+  version: false,
+  hideErrors: true,
+  checkTimeoutInterval: 60000
+});
   // ── SPAWN ────────────────────────
   bot.once(
     "spawn",
