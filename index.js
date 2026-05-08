@@ -49,7 +49,10 @@ function createBot() {
       version:
         "1.21.1",
 
-      hideErrors: true
+      hideErrors: true,
+
+      checkTimeoutInterval:
+        30000
     });
 
   // ── SPAWN ────────────────────────
@@ -61,43 +64,109 @@ function createBot() {
         "Bot fully joined!"
       );
 
-      // register
+      // ── REGISTER ─────────────────
       setTimeout(() => {
 
-        bot.chat(
-          "/register 011020 011020"
-        );
+        try {
+
+          bot.chat(
+            "/register 011020 011020"
+          );
+
+          console.log(
+            "Register sent"
+          );
+
+        } catch (e) {}
 
       }, 3000);
 
-      // login
+      // ── LOGIN ────────────────────
       setTimeout(() => {
 
-        bot.chat(
-          "/login 011020"
-        );
+        try {
+
+          bot.chat(
+            "/login 011020"
+          );
+
+          console.log(
+            "Login sent"
+          );
+
+        } catch (e) {}
 
       }, 6000);
 
-      // anti timeout movement
+      // ── RANDOM MOVEMENT ──────────
       setInterval(() => {
 
-        bot.setControlState(
-          "jump",
-          true
-        );
+        try {
 
-        setTimeout(() => {
-
+          // walk
           bot.setControlState(
-            "jump",
-            false
+            "forward",
+            true
           );
 
-        }, 500);
+          // jump
+          bot.setControlState(
+            "jump",
+            true
+          );
 
+          // random look
+          bot.look(
+            Math.random() *
+            Math.PI * 2,
+
+            0
+          );
+
+          // stop jump
+          setTimeout(() => {
+
+            try {
+
+              bot.setControlState(
+                "jump",
+                false
+              );
+
+            } catch (e) {}
+
+          }, 1000);
+
+          // stop walking
+          setTimeout(() => {
+
+            try {
+
+              bot.setControlState(
+                "forward",
+                false
+              );
+
+            } catch (e) {}
+
+          }, 3000);
+
+        } catch (e) {}
+        
       }, 15000);
 
+      // ── KEEP CHAT ACTIVE ─────────
+      setInterval(() => {
+
+        try {
+
+          bot.chat(
+            "/list"
+          );
+
+        } catch (e) {}
+
+      }, 60000);
     }
   );
 
@@ -137,7 +206,7 @@ function createBot() {
     }
   );
 
-  // ── RECONNECT ────────────────────
+  // ── END ──────────────────────────
   bot.on(
     "end",
     () => {
@@ -155,4 +224,5 @@ function createBot() {
   );
 }
 
+// ── START ──────────────────────────
 createBot();
