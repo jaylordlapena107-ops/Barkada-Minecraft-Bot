@@ -56,113 +56,118 @@ function connectBot() {
         "1.19.4"
     });
 
-  // ── CONNECTED ────────────────────
+  // ── LOGIN EVENT ──────────────────
   client.on(
-    "connect",
+    "login",
     () => {
 
       console.log(
-        "Bot connected!"
+        "Bot joined server!"
       );
 
-      // fallback auto login
+      // auto register
       setTimeout(() => {
 
         try {
 
           client.write(
-            "chat_command",
+            "chat",
             {
-              command:
-                "login 011020"
-            }
-          );
-
-          console.log(
-            "Fallback login sent"
-          );
-
-        } catch (e) {
-
-          console.log(e);
-        }
-
-      }, 10000);
-    }
-  );
-
-  // ── PACKET LISTENER ──────────────
-  client.on(
-    "packet",
-    (data, meta) => {
-
-      try {
-
-        const msg =
-          JSON.stringify(data);
-
-        console.log(
-          "[PACKET]",
-          msg
-        );
-
-        // ── REGISTER DETECT ────────
-        if (
-          msg.includes(
-            "/register"
-          )
-        ) {
-
-          console.log(
-            "Register detected"
-          );
-
-          client.write(
-            "chat_command",
-            {
-              command:
-                "register 011020 011020"
+              message:
+                "/register 011020 011020"
             }
           );
 
           console.log(
             "Register command sent"
           );
-        }
 
-        // ── LOGIN DETECT ───────────
-        if (
-          msg.includes(
-            "/login"
-          )
-        ) {
+        } catch (e) {
 
           console.log(
-            "Login detected"
+            "REGISTER ERROR:",
+            e
           );
+        }
+
+      }, 3000);
+
+      // auto login
+      setTimeout(() => {
+
+        try {
 
           client.write(
-            "chat_command",
+            "chat",
             {
-              command:
-                "login 011020"
+              message:
+                "/login 011020"
             }
           );
 
           console.log(
             "Login command sent"
           );
+
+        } catch (e) {
+
+          console.log(
+            "LOGIN ERROR:",
+            e
+          );
         }
 
-      } catch (e) {
+      }, 6000);
 
-        console.log(
-          "PACKET ERROR:",
-          e
-        );
-      }
     }
   );
+
+  // ── SHOW CHAT ONLY ───────────────
+  client.on(
+    "packet",
+    (data, meta) => {
+
+      try {
+
+        if (
+          meta.name ===
+          "system_chat"
+        ) {
+
+          const msg =
+            JSON.stringify(data);
+
+          console.log(
+            "[CHAT]",
+            msg
+          );
+        }
+
+      } catch (e) {}
+    }
+  );
+
+  // ── KEEP ALIVE ───────────────────
+  setInterval(() => {
+
+    try {
+
+      client.write(
+        "position",
+        {
+          x: 0,
+          y: 0,
+          z: 0,
+          yaw: 0,
+          pitch: 0,
+          flags: 0,
+          onGround: true
+        }
+      );
+
+    } catch (e) {}
+
+  }, 10000);
 
   // ── DISCONNECT ───────────────────
   client.on(
@@ -170,7 +175,7 @@ function connectBot() {
     () => {
 
       console.log(
-        "Bot disconnected."
+        "Disconnected."
       );
 
       setTimeout(() => {
@@ -187,12 +192,12 @@ function connectBot() {
     err => {
 
       console.log(
-        "BOT ERROR:",
+        "ERROR:",
         err
       );
     }
   );
 }
 
-// ── START ──────────────────────────
+// ── START BOT ──────────────────────
 connectBot();
