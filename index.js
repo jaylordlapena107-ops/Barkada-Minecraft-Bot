@@ -7,13 +7,16 @@ require("express");
 const app =
 express();
 
-// WEB SERVER
-app.get("/", (req, res) => {
+// ── WEB SERVER ─────────────────────
+app.get(
+  "/",
+  (req, res) => {
 
-  res.send(
-    "BarkadaBot Online!"
-  );
-});
+    res.send(
+      "BarkadaBot Online!"
+    );
+  }
+);
 
 app.listen(
   process.env.PORT || 3000,
@@ -25,7 +28,7 @@ app.listen(
   }
 );
 
-// CREATE BOT
+// ── CREATE BOT ─────────────────────
 function createBot() {
 
   console.log(
@@ -51,10 +54,13 @@ function createBot() {
         "1.21.1",
 
       hideErrors:
-        true
+        true,
+
+      checkTimeoutInterval:
+        60000
     });
 
-  // JOIN
+  // ── SPAWN ────────────────────────
   bot.once(
     "spawn",
     () => {
@@ -76,7 +82,13 @@ function createBot() {
             "Register sent"
           );
 
-        } catch {}
+        } catch (e) {
+
+          console.log(
+            "REGISTER ERROR:",
+            e
+          );
+        }
 
       }, 5000);
 
@@ -93,7 +105,13 @@ function createBot() {
             "Login sent"
           );
 
-        } catch {}
+        } catch (e) {
+
+          console.log(
+            "LOGIN ERROR:",
+            e
+          );
+        }
 
       }, 8000);
 
@@ -123,64 +141,112 @@ function createBot() {
     }
   );
 
-  // CHAT ONLY
+  // ── PLAYER CHAT ──────────────────
   bot.on(
-    "messagestr",
-    msg => {
+    "chat",
+    (
+      username,
+      message
+    ) => {
 
-      if (
-        msg &&
-        msg.trim() !== ""
-      ) {
+      console.log(
+        `[CHAT] ${username}: ${message}`
+      );
+    }
+  );
+
+  // ── SERVER MESSAGES ──────────────
+  bot.on(
+    "message",
+    jsonMsg => {
+
+      try {
 
         console.log(
-          "[CHAT]",
-          msg
+          "[SERVER]",
+          jsonMsg.toAnsi()
+        );
+
+      } catch {
+
+        console.log(
+          "[SERVER RAW]",
+          jsonMsg.toString()
         );
       }
     }
   );
 
-  // KICK
+  // ── KICK LOGGER ──────────────────
   bot.on(
     "kicked",
     reason => {
 
       console.log(
-        "Kicked:",
-        reason
+        "[KICKED]"
       );
+
+      console.log(reason);
     }
   );
 
-  // ERROR
+  // ── ERROR LOGGER ─────────────────
   bot.on(
     "error",
     err => {
 
       console.log(
-        "Error:",
-        err.message
+        "[ERROR]"
       );
+
+      console.log(err);
+
+      if (
+        err.stack
+      ) {
+
+        console.log(
+          err.stack
+        );
+      }
     }
   );
 
-  // RECONNECT
+  // ── DISCONNECT LOGGER ────────────
   bot.on(
     "end",
-    () => {
+    reason => {
 
       console.log(
-        "Disconnected"
+        "[DISCONNECTED]",
+        reason
       );
 
       setTimeout(() => {
+
+        console.log(
+          "Reconnecting..."
+        );
 
         createBot();
 
       }, 10000);
     }
   );
+
+  // ── LOW LEVEL PACKET LOGGER ──────
+  bot._client.on(
+    "disconnect",
+    packet => {
+
+      console.log(
+        "[DISCONNECT PACKET]"
+      );
+
+      console.log(packet);
+    }
+  );
 }
 
+// ── START ──────────────────────────
 createBot();
