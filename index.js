@@ -10,12 +10,15 @@ const app =
 express();
 
 // ── WEB SERVER ─────────────────────
-app.get("/", (req, res) => {
+app.get(
+  "/",
+  (req, res) => {
 
-  res.send(
-    "BarkadaBot Online!"
-  );
-});
+    res.send(
+      "BarkadaBot Online!"
+    );
+  }
+);
 
 app.listen(
   process.env.PORT || 3000,
@@ -40,7 +43,8 @@ function connectBot() {
       host:
         "barkadacraftsmp.sg1-mczie.fun",
 
-      port: 4090,
+      port:
+        4090,
 
       username:
         "BarkadaBot",
@@ -52,7 +56,7 @@ function connectBot() {
         "1.19.4"
     });
 
-  // ── CONNECTED ────────────────────
+  // ── JOIN ─────────────────────────
   client.on(
     "login",
     () => {
@@ -61,16 +65,16 @@ function connectBot() {
         "Bot joined!"
       );
 
-      // REGISTER
+      // ── AUTO REGISTER ────────────
       setTimeout(() => {
 
         try {
 
           client.write(
-            "chat_command",
+            "chat",
             {
-              command:
-                "register 011020 011020"
+              message:
+                "/register 011020 011020"
             }
           );
 
@@ -78,20 +82,26 @@ function connectBot() {
             "Register sent"
           );
 
-        } catch (e) {}
+        } catch (e) {
+
+          console.log(
+            "REGISTER ERROR:",
+            e.message
+          );
+        }
 
       }, 3000);
 
-      // LOGIN
+      // ── AUTO LOGIN ───────────────
       setTimeout(() => {
 
         try {
 
           client.write(
-            "chat_command",
+            "chat",
             {
-              command:
-                "login 011020"
+              message:
+                "/login 011020"
             }
           );
 
@@ -99,13 +109,18 @@ function connectBot() {
             "Login sent"
           );
 
-        } catch (e) {}
+        } catch (e) {
+
+          console.log(
+            "LOGIN ERROR:",
+            e.message
+          );
+        }
 
       }, 6000);
 
       // ── ANTI TIMEOUT ─────────────
       let x = 1265.5;
-      let z = -288.5;
 
       setInterval(() => {
 
@@ -118,7 +133,7 @@ function connectBot() {
             {
               x: x,
               y: 66,
-              z: z,
+              z: -288.5,
               onGround: true
             }
           );
@@ -133,10 +148,10 @@ function connectBot() {
         try {
 
           client.write(
-            "chat_command",
+            "chat",
             {
-              command:
-                "list"
+              message:
+                "/list"
             }
           );
 
@@ -161,7 +176,6 @@ function connectBot() {
           const msg =
             JSON.stringify(data);
 
-          // only show readable chat
           if (
             msg.includes("text")
           ) {
