@@ -1,5 +1,7 @@
-const mineflayer =
-require("mineflayer");
+const mc =
+require(
+  "minecraft-protocol"
+);
 
 const express =
 require("express");
@@ -25,15 +27,15 @@ app.listen(
   }
 );
 
-// ── CREATE BOT ─────────────────────
-function createBot() {
+// ── CONNECT BOT ────────────────────
+function connectBot() {
 
   console.log(
     "Connecting..."
   );
 
-  const bot =
-    mineflayer.createBot({
+  const client =
+    mc.createClient({
 
       host:
         "barkadacraftsmp.sg1-mczie.fun",
@@ -47,30 +49,29 @@ function createBot() {
         "offline",
 
       version:
-        "1.21.1",
-
-      hideErrors: true,
-
-      checkTimeoutInterval:
-        30000
+        "1.19.4"
     });
 
-  // ── SPAWN ────────────────────────
-  bot.once(
-    "spawn",
+  // ── CONNECTED ────────────────────
+  client.on(
+    "login",
     () => {
 
       console.log(
-        "Bot fully joined!"
+        "Bot joined!"
       );
 
-      // ── REGISTER ─────────────────
+      // REGISTER
       setTimeout(() => {
 
         try {
 
-          bot.chat(
-            "/register 011020 011020"
+          client.write(
+            "chat_command",
+            {
+              command:
+                "register 011020 011020"
+            }
           );
 
           console.log(
@@ -81,13 +82,17 @@ function createBot() {
 
       }, 3000);
 
-      // ── LOGIN ────────────────────
+      // LOGIN
       setTimeout(() => {
 
         try {
 
-          bot.chat(
-            "/login 011020"
+          client.write(
+            "chat_command",
+            {
+              command:
+                "login 011020"
+            }
           );
 
           console.log(
@@ -98,70 +103,41 @@ function createBot() {
 
       }, 6000);
 
-      // ── RANDOM MOVEMENT ──────────
+      // ── ANTI TIMEOUT ─────────────
+      let x = 1265.5;
+      let z = -288.5;
+
       setInterval(() => {
 
         try {
 
-          // walk
-          bot.setControlState(
-            "forward",
-            true
+          x += 0.05;
+
+          client.write(
+            "position",
+            {
+              x: x,
+              y: 66,
+              z: z,
+              onGround: true
+            }
           );
-
-          // jump
-          bot.setControlState(
-            "jump",
-            true
-          );
-
-          // random look
-          bot.look(
-            Math.random() *
-            Math.PI * 2,
-
-            0
-          );
-
-          // stop jump
-          setTimeout(() => {
-
-            try {
-
-              bot.setControlState(
-                "jump",
-                false
-              );
-
-            } catch (e) {}
-
-          }, 1000);
-
-          // stop walking
-          setTimeout(() => {
-
-            try {
-
-              bot.setControlState(
-                "forward",
-                false
-              );
-
-            } catch (e) {}
-
-          }, 3000);
 
         } catch (e) {}
-        
-      }, 15000);
+
+      }, 2000);
 
       // ── KEEP CHAT ACTIVE ─────────
       setInterval(() => {
 
         try {
 
-          bot.chat(
-            "/list"
+          client.write(
+            "chat_command",
+            {
+              command:
+                "list"
+            }
           );
 
         } catch (e) {}
@@ -171,31 +147,37 @@ function createBot() {
   );
 
   // ── CHAT LOGGER ──────────────────
-  bot.on(
-    "messagestr",
-    msg => {
+  client.on(
+    "packet",
+    (data, meta) => {
 
-      console.log(
-        "[CHAT]",
-        msg
-      );
-    }
-  );
+      try {
 
-  // ── KICK ─────────────────────────
-  bot.on(
-    "kicked",
-    reason => {
+        if (
+          meta.name ===
+          "system_chat"
+        ) {
 
-      console.log(
-        "KICKED:",
-        reason
-      );
+          const msg =
+            JSON.stringify(data);
+
+          // only show readable chat
+          if (
+            msg.includes("text")
+          ) {
+
+            console.log(
+              "[CHAT MESSAGE]"
+            );
+          }
+        }
+
+      } catch (e) {}
     }
   );
 
   // ── ERROR ────────────────────────
-  bot.on(
+  client.on(
     "error",
     err => {
 
@@ -206,18 +188,19 @@ function createBot() {
     }
   );
 
-  // ── END ──────────────────────────
-  bot.on(
+  // ── DISCONNECT ───────────────────
+  client.on(
     "end",
-    () => {
+    reason => {
 
       console.log(
-        "Disconnected."
+        "Disconnected:",
+        reason
       );
 
       setTimeout(() => {
 
-        createBot();
+        connectBot();
 
       }, 10000);
     }
@@ -225,4 +208,4 @@ function createBot() {
 }
 
 // ── START ──────────────────────────
-createBot();
+connectBot();
