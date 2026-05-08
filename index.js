@@ -1,7 +1,5 @@
-const mc =
-require(
-  "minecraft-protocol"
-);
+const mineflayer =
+require("mineflayer");
 
 const express =
 require("express");
@@ -10,15 +8,12 @@ const app =
 express();
 
 // ── WEB SERVER ─────────────────────
-app.get(
-  "/",
-  (req, res) => {
+app.get("/", (req, res) => {
 
-    res.send(
-      "Bot Online"
-    );
-  }
-);
+  res.send(
+    "BarkadaBot Online!"
+  );
+});
 
 app.listen(
   process.env.PORT || 3000,
@@ -30,21 +25,20 @@ app.listen(
   }
 );
 
-// ── CONNECT BOT ────────────────────
-function connectBot() {
+// ── CREATE BOT ─────────────────────
+function createBot() {
 
   console.log(
     "Connecting..."
   );
 
-  const client =
-    mc.createClient({
+  const bot =
+    mineflayer.createBot({
 
       host:
         "barkadacraftsmp.sg1-mczie.fun",
 
-      port:
-        4090,
+      port: 4090,
 
       username:
         "BarkadaBot",
@@ -53,128 +47,86 @@ function connectBot() {
         "offline",
 
       version:
-        "1.19.4"
+        "1.21.1",
+
+      hideErrors: true
     });
 
-  // ── CONNECTED ────────────────────
-  client.on(
-    "connect",
+  // ── SPAWN ────────────────────────
+  bot.once(
+    "spawn",
     () => {
 
       console.log(
-        "Connected!"
+        "Bot fully joined!"
       );
-    }
-  );
 
-  // ── CHAT DETECTION ───────────────
-  client.on(
-    "packet",
-    (data, meta) => {
+      // register
+      setTimeout(() => {
 
-      try {
-
-        if (
-          meta.name !==
-          "system_chat"
-        ) return;
-
-        const msg =
-          JSON.stringify(data);
-
-        // show chat only
-        console.log(
-          "[CHAT]",
-          msg
+        bot.chat(
+          "/register 011020 011020"
         );
 
-        // auto register
-        if (
-          msg.includes(
-            "/register"
-          )
-        ) {
+      }, 3000);
 
-          console.log(
-            "Registering..."
+      // login
+      setTimeout(() => {
+
+        bot.chat(
+          "/login 011020"
+        );
+
+      }, 6000);
+
+      // anti timeout movement
+      setInterval(() => {
+
+        bot.setControlState(
+          "jump",
+          true
+        );
+
+        setTimeout(() => {
+
+          bot.setControlState(
+            "jump",
+            false
           );
 
-          client.write(
-            "chat_command",
-            {
-              command:
-                "register 011020 011020"
-            }
-          );
-        }
+        }, 500);
 
-        // auto login
-        if (
-          msg.includes(
-            "/login"
-          )
-        ) {
+      }, 15000);
 
-          console.log(
-            "Logging in..."
-          );
-
-          client.write(
-            "chat_command",
-            {
-              command:
-                "login 011020"
-            }
-          );
-        }
-
-      } catch (e) {
-
-        console.log(e);
-      }
     }
   );
 
-  // ── KEEP ALIVE ───────────────────
-  const keepAlive =
-  setInterval(() => {
-
-    try {
-
-      client.write(
-        "keep_alive",
-        {
-          keepAliveId:
-            BigInt(Date.now())
-        }
-      );
-
-    } catch (e) {}
-
-  }, 15000);
-
-  // ── DISCONNECT ───────────────────
-  client.on(
-    "end",
-    () => {
+  // ── CHAT LOGGER ──────────────────
+  bot.on(
+    "messagestr",
+    msg => {
 
       console.log(
-        "Disconnected"
+        "[CHAT]",
+        msg
       );
+    }
+  );
 
-      clearInterval(
-        keepAlive
-      );
+  // ── KICK ─────────────────────────
+  bot.on(
+    "kicked",
+    reason => {
 
-      setTimeout(
-        connectBot,
-        10000
+      console.log(
+        "KICKED:",
+        reason
       );
     }
   );
 
   // ── ERROR ────────────────────────
-  client.on(
+  bot.on(
     "error",
     err => {
 
@@ -184,7 +136,23 @@ function connectBot() {
       );
     }
   );
+
+  // ── RECONNECT ────────────────────
+  bot.on(
+    "end",
+    () => {
+
+      console.log(
+        "Disconnected."
+      );
+
+      setTimeout(() => {
+
+        createBot();
+
+      }, 10000);
+    }
+  );
 }
 
-// ── START ──────────────────────────
-connectBot();
+createBot();
