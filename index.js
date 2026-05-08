@@ -53,7 +53,7 @@ function connectBot() {
         "offline",
 
       version:
-        "1.21.1"
+        "1.21.11"
     });
 
   // ── LOGIN EVENT ──────────────────
