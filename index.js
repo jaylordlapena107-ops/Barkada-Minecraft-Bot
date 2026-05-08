@@ -15,7 +15,7 @@ app.get(
   (req, res) => {
 
     res.send(
-      "BarkadaBot Online!"
+      "Bot Online"
     );
   }
 );
@@ -34,7 +34,7 @@ app.listen(
 function connectBot() {
 
   console.log(
-    "Connecting bot..."
+    "Connecting..."
   );
 
   const client =
@@ -53,76 +53,21 @@ function connectBot() {
         "offline",
 
       version:
-        "1.21.1"
+        "1.19.4"
     });
 
-  // ── LOGIN EVENT ──────────────────
+  // ── CONNECTED ────────────────────
   client.on(
-    "login",
+    "connect",
     () => {
 
       console.log(
-        "Bot joined server!"
+        "Connected!"
       );
-
-      // auto register
-      setTimeout(() => {
-
-        try {
-
-          client.write(
-            "chat",
-            {
-              message:
-                "/register 011020 011020"
-            }
-          );
-
-          console.log(
-            "Register command sent"
-          );
-
-        } catch (e) {
-
-          console.log(
-            "REGISTER ERROR:",
-            e
-          );
-        }
-
-      }, 3000);
-
-      // auto login
-      setTimeout(() => {
-
-        try {
-
-          client.write(
-            "chat",
-            {
-              message:
-                "/login 011020"
-            }
-          );
-
-          console.log(
-            "Login command sent"
-          );
-
-        } catch (e) {
-
-          console.log(
-            "LOGIN ERROR:",
-            e
-          );
-        }
-
-      }, 6000);
-
     }
   );
 
-  // ── SHOW CHAT ONLY ───────────────
+  // ── CHAT DETECTION ───────────────
   client.on(
     "packet",
     (data, meta) => {
@@ -130,44 +75,83 @@ function connectBot() {
       try {
 
         if (
-          meta.name ===
+          meta.name !==
           "system_chat"
+        ) return;
+
+        const msg =
+          JSON.stringify(data);
+
+        // show chat only
+        console.log(
+          "[CHAT]",
+          msg
+        );
+
+        // auto register
+        if (
+          msg.includes(
+            "/register"
+          )
         ) {
 
-          const msg =
-            JSON.stringify(data);
-
           console.log(
-            "[CHAT]",
-            msg
+            "Registering..."
+          );
+
+          client.write(
+            "chat_command",
+            {
+              command:
+                "register 011020 011020"
+            }
           );
         }
 
-      } catch (e) {}
+        // auto login
+        if (
+          msg.includes(
+            "/login"
+          )
+        ) {
+
+          console.log(
+            "Logging in..."
+          );
+
+          client.write(
+            "chat_command",
+            {
+              command:
+                "login 011020"
+            }
+          );
+        }
+
+      } catch (e) {
+
+        console.log(e);
+      }
     }
   );
 
   // ── KEEP ALIVE ───────────────────
+  const keepAlive =
   setInterval(() => {
 
     try {
 
       client.write(
-        "position",
+        "keep_alive",
         {
-          x: 0,
-          y: 0,
-          z: 0,
-          yaw: 0,
-          pitch: 0,
-          flags: 0,
-          onGround: true
+          keepAliveId:
+            BigInt(Date.now())
         }
       );
 
     } catch (e) {}
 
-  }, 10000);
+  }, 15000);
 
   // ── DISCONNECT ───────────────────
   client.on(
@@ -175,14 +159,17 @@ function connectBot() {
     () => {
 
       console.log(
-        "Disconnected."
+        "Disconnected"
       );
 
-      setTimeout(() => {
+      clearInterval(
+        keepAlive
+      );
 
-        connectBot();
-
-      }, 10000);
+      setTimeout(
+        connectBot,
+        10000
+      );
     }
   );
 
@@ -193,11 +180,11 @@ function connectBot() {
 
       console.log(
         "ERROR:",
-        err
+        err.message
       );
     }
   );
 }
 
-// ── START BOT ──────────────────────
+// ── START ──────────────────────────
 connectBot();
