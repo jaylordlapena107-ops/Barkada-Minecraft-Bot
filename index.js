@@ -1,7 +1,5 @@
-const mc =
-require(
-  "minecraft-protocol"
-);
+const mineflayer =
+require("mineflayer");
 
 const express =
 require("express");
@@ -9,16 +7,13 @@ require("express");
 const app =
 express();
 
-// ── WEB SERVER ─────────────────────
-app.get(
-  "/",
-  (req, res) => {
+// WEB SERVER
+app.get("/", (req, res) => {
 
-    res.send(
-      "BarkadaBot Online!"
-    );
-  }
-);
+  res.send(
+    "BarkadaBot Online!"
+  );
+});
 
 app.listen(
   process.env.PORT || 3000,
@@ -30,15 +25,15 @@ app.listen(
   }
 );
 
-// ── CONNECT BOT ────────────────────
-function connectBot() {
+// CREATE BOT
+function createBot() {
 
   console.log(
     "Connecting..."
   );
 
-  const client =
-    mc.createClient({
+  const bot =
+    mineflayer.createBot({
 
       host:
         "barkadacraftsmp.sg1-mczie.fun",
@@ -53,173 +48,139 @@ function connectBot() {
         "offline",
 
       version:
-        "1.19.4"
+        "1.21.1",
+
+      hideErrors:
+        true
     });
 
-  // ── JOIN ─────────────────────────
-  client.on(
-    "login",
+  // JOIN
+  bot.once(
+    "spawn",
     () => {
 
       console.log(
         "Bot joined!"
       );
 
-      // ── AUTO REGISTER ────────────
+      // REGISTER
       setTimeout(() => {
 
         try {
 
-          client.write(
-            "chat",
-            {
-              message:
-                "/register 011020 011020"
-            }
+          bot.chat(
+            "/register 011020 011020"
           );
 
           console.log(
             "Register sent"
           );
 
-        } catch (e) {
+        } catch {}
 
-          console.log(
-            "REGISTER ERROR:",
-            e.message
-          );
-        }
+      }, 5000);
 
-      }, 3000);
-
-      // ── AUTO LOGIN ───────────────
+      // LOGIN
       setTimeout(() => {
 
         try {
 
-          client.write(
-            "chat",
-            {
-              message:
-                "/login 011020"
-            }
+          bot.chat(
+            "/login 011020"
           );
 
           console.log(
             "Login sent"
           );
 
-        } catch (e) {
+        } catch {}
 
-          console.log(
-            "LOGIN ERROR:",
-            e.message
-          );
-        }
+      }, 8000);
 
-      }, 6000);
-
-      // ── ANTI TIMEOUT ─────────────
-      let x = 1265.5;
-
+      // ANTI AFK
       setInterval(() => {
 
         try {
 
-          x += 0.05;
-
-          client.write(
-            "position",
-            {
-              x: x,
-              y: 66,
-              z: -288.5,
-              onGround: true
-            }
+          bot.setControlState(
+            "jump",
+            true
           );
 
-        } catch (e) {}
+          setTimeout(() => {
 
-      }, 2000);
-
-      // ── KEEP CHAT ACTIVE ─────────
-      setInterval(() => {
-
-        try {
-
-          client.write(
-            "chat",
-            {
-              message:
-                "/list"
-            }
-          );
-
-        } catch (e) {}
-
-      }, 60000);
-    }
-  );
-
-  // ── CHAT LOGGER ──────────────────
-  client.on(
-    "packet",
-    (data, meta) => {
-
-      try {
-
-        if (
-          meta.name ===
-          "system_chat"
-        ) {
-
-          const msg =
-            JSON.stringify(data);
-
-          if (
-            msg.includes("text")
-          ) {
-
-            console.log(
-              "[CHAT MESSAGE]"
+            bot.setControlState(
+              "jump",
+              false
             );
-          }
-        }
 
-      } catch (e) {}
+          }, 500);
+
+        } catch {}
+
+      }, 30000);
+
     }
   );
 
-  // ── ERROR ────────────────────────
-  client.on(
+  // CHAT ONLY
+  bot.on(
+    "messagestr",
+    msg => {
+
+      if (
+        msg &&
+        msg.trim() !== ""
+      ) {
+
+        console.log(
+          "[CHAT]",
+          msg
+        );
+      }
+    }
+  );
+
+  // KICK
+  bot.on(
+    "kicked",
+    reason => {
+
+      console.log(
+        "Kicked:",
+        reason
+      );
+    }
+  );
+
+  // ERROR
+  bot.on(
     "error",
     err => {
 
       console.log(
-        "ERROR:",
+        "Error:",
         err.message
       );
     }
   );
 
-  // ── DISCONNECT ───────────────────
-  client.on(
+  // RECONNECT
+  bot.on(
     "end",
-    reason => {
+    () => {
 
       console.log(
-        "Disconnected:",
-        reason
+        "Disconnected"
       );
 
       setTimeout(() => {
 
-        connectBot();
+        createBot();
 
       }, 10000);
     }
   );
 }
 
-// ── START ──────────────────────────
-connectBot();
+createBot();
